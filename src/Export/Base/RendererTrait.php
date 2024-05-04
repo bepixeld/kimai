@@ -28,6 +28,10 @@ trait RendererTrait
         $summary = [];
 
         foreach ($exportItems as $exportItem) {
+            if ($exportItem->getFixedRate()) {
+                continue;
+            }
+
             $customerId = 'none';
             $projectId = 'none';
             $activityId = 'none';
@@ -67,6 +71,7 @@ trait RendererTrait
                     'rate' => 0,
                     'rate_internal' => 0,
                     'duration' => 0,
+                    'duration_billable' => 0,
                     'type' => [],
                     'types' => [],
                     'users' => []
@@ -85,6 +90,7 @@ trait RendererTrait
                     'rate' => 0,
                     'rate_internal' => 0,
                     'duration' => 0,
+                    'duration_billable' => 0,
                 ];
             }
 
@@ -93,6 +99,7 @@ trait RendererTrait
                     'rate' => 0,
                     'rate_internal' => 0,
                     'duration' => 0,
+                    'duration_billable' => 0,
                 ];
             }
 
@@ -103,6 +110,7 @@ trait RendererTrait
                     'rate' => 0,
                     'rate_internal' => 0,
                     'duration' => 0,
+                    'duration_billable' => 0,
                     'users' => []
                 ];
 
@@ -118,6 +126,7 @@ trait RendererTrait
                     'rate' => 0,
                     'rate_internal' => 0,
                     'duration' => 0,
+                    'duration_billable' => 0,
                 ];
             }
             if (!isset($summary[$id]['activities'][$activityId]['users'][$userId])) {
@@ -126,6 +135,7 @@ trait RendererTrait
                     'rate' => 0,
                     'rate_internal' => 0,
                     'duration' => 0,
+                    'duration_billable' => 0,
                 ];
             }
 
@@ -138,12 +148,14 @@ trait RendererTrait
             $internalRate = $exportItem->getInternalRate() ?? 0;
 
             // rate
-            $summary[$id]['rate'] += $rate;
-            $summary[$id]['type'][$type]['rate'] += $rate;
-            $summary[$id]['types'][$type][$category]['rate'] += $rate;
-            $summary[$id]['users'][$userId]['rate'] += $rate;
-            $summary[$id]['activities'][$activityId]['rate'] += $rate;
-            $summary[$id]['activities'][$activityId]['users'][$userId]['rate'] += $rate;
+            if ($exportItem->isBillable()) {
+                $summary[$id]['rate'] += $rate;
+                $summary[$id]['type'][$type]['rate'] += $rate;
+                $summary[$id]['types'][$type][$category]['rate'] += $rate;
+                $summary[$id]['users'][$userId]['rate'] += $rate;
+                $summary[$id]['activities'][$activityId]['rate'] += $rate;
+                $summary[$id]['activities'][$activityId]['users'][$userId]['rate'] += $rate;
+            }
 
             // internal rate
             $summary[$id]['rate_internal'] += $internalRate;
@@ -160,6 +172,16 @@ trait RendererTrait
             $summary[$id]['users'][$userId]['duration'] += $duration;
             $summary[$id]['activities'][$activityId]['duration'] += $duration;
             $summary[$id]['activities'][$activityId]['users'][$userId]['duration'] += $duration;
+
+            // duration_billable
+            if (($exportItem->isBillable())) {
+                $summary[$id]['duration_billable'] += $duration;
+                $summary[$id]['type'][$type]['duration_billable'] += $duration;
+                $summary[$id]['types'][$type][$category]['duration_billable'] += $duration;
+                $summary[$id]['users'][$userId]['duration_billable'] += $duration;
+                $summary[$id]['activities'][$activityId]['duration_billable'] += $duration;
+                $summary[$id]['activities'][$activityId]['users'][$userId]['duration_billable'] += $duration;
+            }
         }
 
         asort($summary);

@@ -62,3 +62,6 @@ yarn-error.log
 /nbproject/*
 
 .dockerhub.secrets
+/.settings/
+/.buildpath
+/.project
